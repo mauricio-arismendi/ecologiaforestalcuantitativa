@@ -26,12 +26,8 @@ jaimito <- subset(radiatapl2, radiatapl2$parce == 1)
 jaimito
 
 
-#creo var x
-jaimito$x <-log(1/(jaimito$dap+10))
-jaimito$x
-#creo var y
-jaimito$h <-sqrt(jaimito$atot)
-jaimito$h
+radiatapl2
+plot(radiatapl2$dap )
 
 #sacamos los NA 
 newJaimito <-  na.omit(jaimito)
@@ -47,16 +43,40 @@ newJaimito$h
 plot(newJaimito$x~newJaimito$h, data=newJaimito)
 
 
+
+##sqrt(h)=(b0+b1*ln(1/x+10))
+
 ##4 Ajuste el modelo estadístico dado. 
 ##-parámetro "xxx" = "número XXX"
+
+mod <- lm(newJaimito$h ~ newJaimito$x, data = newJaimito)
+mod
+summary(mod)
+b0est<-coef(mod)[1]
+b1est<-coef(mod)[2]
+b0est
+b1est
+#parametro b0 = 0.2208
+#parametro b1 = -1.0452 
+#error =  0.1129 
 
 
 ##5 Asumiendo arbol dap 13 cm
 ##y empleando el modelo ajustado, calcular valor predicho para altura en m
 
+h=(0.2207931 + -1.045165 * log(1/23))**2
+h
+
+#12.23532 metros
+
+
 ##6 Empleando el modelo ajustado predecir altura arboles de parcela a los q no se ha medido
 #esa variable. Una vez q todos los arboles de la parcela tengan un val de altura, calcular 
 ## altura media (en m) de todos los arboles de la parcela
+
+jaimito$atot
+
+
 
 ##7 Usando el residual en unidades orignales de la variable (es decir ê=hi-^hi)
 ##donde hi es altura observada para la i-esima observacion y ^hi es la altura predicha x el modelo ajustado
@@ -70,46 +90,19 @@ plot(newJaimito$x~newJaimito$h, data=newJaimito)
 
 ##donde wi, di, hi, es la biomasa en kg, el dap (en cm), h (en m) para el i-esimo arbol, respectivamente
 a0 = 5.44174; a1=0.0257348;a2 = 0.031996 
-
-wi = exp(a0 + a1*(jaimito$dap*10) + a2*(jaimito$atot))
-sum(wi, na.rm = TRUE)   # Suma ignorando NA
-
-
-
 a0
+a1
+a2
+wi = a0 + a1*(jaimito$dap) + a2*(jaimito$atot)
+witotal <- exp(wi)
+sum(witotal, na.rm = T)
+5081.692*fc
+witha <- fc*sum(witotal, na.rm = TRUE)   
+witha  
+##me da 338779.5 kg 
 
-jaimito
 
-##y <- (b0 + b1*ln(1/x+10))**2
+##h <- (b0 + b1*ln(1/x+10))**2
 
 
 #sqrt(h)=(b0+b1*ln(1/x+10))
-
-##creando la variable Y necesaria para el modelo 3
-jaimito$sq.h<-sqrt(jaimito$dap)
-
-##creando la variable X necesaria para el modelo 3
-jaimito$ln.d<- log(1/jaimito$dap+10)
-
-plot(sq.h~ln.d, data=df)
-
-descstat(df[,c("dap","exp.d","atot","ln.h")])
-mod3<- lm(ln.h~exp.d, data=df)
-summary(mod3)
-b0.hat3<-coef(mod3)[1]
-b1.hat3<-coef(mod3)[2]
-b0.hat3
-b1.hat3
-h.ajumod3 <- exp(b0.hat3 + b1.hat3 * exp(-0.03*d.fake))
-
-
-data <- jaimito
-
-modelo_lin <- lm(sqrt(h) ~ I(log(1/(x + 10))), data = data)
-
-
-modelo_nls <- nls(sqrt(h) ~ b0 + b1*log(1/(x + 10)),
-                  data = data,
-                  start = list(b0 = 1, b1 = 1))  # Valores iniciales
-
-

@@ -34,11 +34,11 @@ newJaimito <-  na.omit(jaimito)
 newJaimito
 
 #creo var x
-newJaimito$x <-log(1/(newJaimito$dap+10))
-newJaimito$x
+jaimito$x <-log(1/(jaimito$dap+10))
+jaimito$x
 #creo var y
-newJaimito$h <-sqrt(newJaimito$atot)
-newJaimito$h
+jaimito$h <-sqrt(jaimito$atot)
+jaimito$h
 #grafica solo pa ver
 plot(newJaimito$x~newJaimito$h, data=newJaimito)
 
@@ -48,8 +48,9 @@ plot(newJaimito$x~newJaimito$h, data=newJaimito)
 
 ##4 Ajuste el modelo estadístico dado. 
 ##-parámetro "xxx" = "número XXX"
-
-mod <- lm(newJaimito$h ~ newJaimito$x, data = newJaimito)
+jaimito
+newJaimito
+mod <- lm(jaimito$h ~ jaimito$x, data = jaimito)
 mod
 summary(mod)
 b0est<-coef(mod)[1]
@@ -74,8 +75,42 @@ h
 #esa variable. Una vez q todos los arboles de la parcela tengan un val de altura, calcular 
 ## altura media (en m) de todos los arboles de la parcela
 
-jaimito$atot
+jaimito
+newJaimito
+library(dplyr)
 
+##modelo dendrometrico: conservar las alturas medidas, y solo
+# predecir a las observaciones no medidas.
+#como logramos lo anterior?
+jaimito$h.aju <- predict(mod, newdata = jaimito)
+mod
+summary(jaimito$h.aju)
+jaimito$h.final <- jaimito$h.aju
+
+#porcion de arboles donde no se midio la altura
+jaimitona <- jaimito[is.na(jaimito$atot),]
+jaimitona
+jaimitona$h.final <- jaimitona$atot
+dim(jaimitona)
+
+#porcion de arboles donde si se midio la altura
+jaimitosi <- jaimito[!is.na(jaimito$atot),]
+jaimitosi
+dim(jaimitosi)
+jaimitosi$h.final <- jaimitosi$atot
+jaimitosi
+
+#finalmente tenemos el tree list o listado de arboles con todas las variables
+# necesarias
+trl <- rbind(jaimitona,jaimitosi)
+dim(trl)
+
+trl**2
+
+mean(trl$h.aju**2) 
+##################### 12.49
+
+?is.na
 
 
 ##7 Usando el residual en unidades orignales de la variable (es decir ê=hi-^hi)
@@ -84,25 +119,68 @@ jaimito$atot
 
 ## DAA = 1/n sum(abs(êi))
 
+mod
+summary(mod)
+
+0.1129/8
+jaimitoobservado <- jaimito[!is.na(jaimito$atot),]
+jaimitoobservado
+
+jaimitopredicho <- (jaimitoobservado$h.aju)**2
+jaimitopredicho
+
+e <- jaimitoobservado$atot - jaimito$h.final
+
+nrow(jaimitoobservado)
+
+daa <- (1/nrow(jaimitoobservado))* abs(sum((jaimitoobservado$atot) - sum(jaimitopredicho)))
+sum(jaimitoobservado$atot)
+sum(jaimitopredicho)
+127.2-127.0981
+0.1019*0.1
+1/10
 ##8 Estimar biomasa aérea del bosque en ton/ha. con el sgte modelo ajustado:
-
-
+0.01019-100
+jaimitoobservado
+jaimitopredicho
 
 ##donde wi, di, hi, es la biomasa en kg, el dap (en cm), h (en m) para el i-esimo arbol, respectivamente
 a0 = 5.44174; a1=0.0257348;a2 = 0.031996 
 a0
 a1
 a2
-wi = a0 + a1*(jaimito$dap) + a2*(jaimito$atot)
+wi = a0 + a1*(jaimito$dap) + a2*(jaimito$h.aju**2)
+wi
 witotal <- exp(wi)
-sum(witotal, na.rm = T)
-5081.692*fc
-witha <- fc*sum(witotal, na.rm = TRUE)   
-witha  
-##me da 338779.5 kg 
 
+sum(witotal, na.rm = T)*fc
 
-##h <- (b0 + b1*ln(1/x+10))**2
+witha <- fc*sum(wi, na.rm = TRUE)   
+witha
+##me da 724.809 ton/ha 
 
+jaimito$h.aju <- predict(mod, newdata = jaimito)
+summary(jaimito$h.aju)
+jaimito$h.final <- jaimito$h.aju
 
-#sqrt(h)=(b0+b1*ln(1/x+10))
+#porcion de arboles donde no se midio la altura
+modelitow <- modelitow[is.na(jaimito$atot),]
+jaimitona
+jaimitona$h.final <- jaimitona$atot
+dim(jaimitona)
+
+#porcion de arboles donde si se midio la altura
+jaimitosi <- jaimito[!is.na(jaimito$atot),]
+dim(jaimitosi)
+jaimitosi$h.final <- jaimitosi$atot
+jaimitosi
+
+#finalmente tenemos el tree list o listado de arboles con todas las variables
+# necesarias
+trl <- rbind(jaimitona,jaimitosi)
+dim(trl)
+
+trl**2
+
+mean(trl$h.aju**2) 
+
